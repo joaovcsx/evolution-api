@@ -1,7 +1,7 @@
-import { EventDto } from '@api/integrations/event/event.dto';
-import { PrismaRepository } from '@api/repository/repository.service';
+import { EventDto }            from '@api/integrations/event/event.dto';
+import { PrismaRepository }    from '@api/repository/repository.service';
 import { WAMonitoringService } from '@api/services/monitor.service';
-import { wa } from '@api/types/wa.types';
+import { wa }                  from '@api/types/wa.types';
 
 export type EmitData = {
   instanceName: string;
@@ -132,6 +132,7 @@ export class EventController {
     'MESSAGES_UPDATE',
     'MESSAGES_DELETE',
     'SEND_MESSAGE',
+    'SEND_MESSAGE_UPDATE',
     'CONTACTS_SET',
     'CONTACTS_UPSERT',
     'CONTACTS_UPDATE',
@@ -151,5 +152,8 @@ export class EventController {
     'TYPEBOT_CHANGE_STATUS',
     'REMOVE_INSTANCE',
     'LOGOUT_INSTANCE',
+    'INSTANCE_CREATE',
+    'INSTANCE_DELETE',
+    'STATUS_INSTANCE',
   ];
 }

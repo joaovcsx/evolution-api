@@ -1,5 +1,5 @@
 import { JSONSchema7 } from 'json-schema';
-import { v4 } from 'uuid';
+import { v4 }          from 'uuid';
 
 const isNotEmpty = (...propertyNames: string[]): JSONSchema7 => {
   const properties = {};
@@ -40,6 +40,8 @@ export const flowiseSchema: JSONSchema7 = {
     keepOpen: { type: 'boolean' },
     debounceTime: { type: 'integer' },
     ignoreJids: { type: 'array', items: { type: 'string' } },
+    splitMessages: { type: 'boolean' },
+    timePerChar: { type: 'integer' },
   },
   required: ['enabled', 'apiUrl', 'triggerType'],
   ...isNotEmpty('enabled', 'apiUrl', 'triggerType'),
@@ -69,7 +71,9 @@ export const flowiseSettingSchema: JSONSchema7 = {
     keepOpen: { type: 'boolean' },
     debounceTime: { type: 'integer' },
     ignoreJids: { type: 'array', items: { type: 'string' } },
-    botIdFallback: { type: 'string' },
+    flowiseIdFallback: { type: 'string' },
+    splitMessages: { type: 'boolean' },
+    timePerChar: { type: 'integer' },
   },
   required: [
     'expire',

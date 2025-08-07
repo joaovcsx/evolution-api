@@ -1,11 +1,11 @@
-import { RouterBroker } from '@api/abstract/abstract.router';
-import { InstanceDto, SetPresenceDto } from '@api/dto/instance.dto';
-import { instanceController } from '@api/server.module';
-import { ConfigService } from '@config/env.config';
+import { RouterBroker }                       from '@api/abstract/abstract.router';
+import { InstanceDto, SetPresenceDto }        from '@api/dto/instance.dto';
+import { instanceController }                 from '@api/server.module';
+import { ConfigService }                      from '@config/env.config';
 import { instanceSchema, presenceOnlySchema } from '@validate/validate.schema';
-import { RequestHandler, Router } from 'express';
+import { RequestHandler, Router }             from 'express';
 
-import { HttpStatus } from './index.router';
+import { HttpStatus }                         from './index.router';
 
 export class InstanceRouter extends RouterBroker {
   constructor(
@@ -15,7 +15,6 @@ export class InstanceRouter extends RouterBroker {
     super();
     this.router
       .post('/create', ...guards, async (req, res) => {
-        console.log('create instance', req.body);
         const response = await this.dataValidate<InstanceDto>({
           request: req,
           schema: instanceSchema,

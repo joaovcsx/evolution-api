@@ -1,5 +1,5 @@
-import { JSONSchema7 } from 'json-schema';
-import { v4 } from 'uuid';
+import { JSONSchema7 }     from 'json-schema';
+import { v4 }              from 'uuid';
 
 import { EventController } from './event.controller';
 
@@ -14,6 +14,9 @@ export const eventSchema: JSONSchema7 = {
       $ref: '#/$defs/event',
     },
     rabbitmq: {
+      $ref: '#/$defs/event',
+    },
+    nats: {
       $ref: '#/$defs/event',
     },
     sqs: {

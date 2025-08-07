@@ -1,9 +1,9 @@
-import { RouterBroker } from '@api/abstract/abstract.router';
-import { IgnoreJidDto } from '@api/dto/chatbot.dto';
-import { InstanceDto } from '@api/dto/instance.dto';
+import { RouterBroker }                                from '@api/abstract/abstract.router';
+import { IgnoreJidDto }                                from '@api/dto/chatbot.dto';
+import { InstanceDto }                                 from '@api/dto/instance.dto';
 import { OpenaiCredsDto, OpenaiDto, OpenaiSettingDto } from '@api/integrations/chatbot/openai/dto/openai.dto';
-import { HttpStatus } from '@api/routes/index.router';
-import { openaiController } from '@api/server.module';
+import { HttpStatus }                                  from '@api/routes/index.router';
+import { openaiController }                            from '@api/server.module';
 import {
   instanceSchema,
   openaiCredsSchema,
@@ -12,7 +12,7 @@ import {
   openaiSettingSchema,
   openaiStatusSchema,
 } from '@validate/validate.schema';
-import { RequestHandler, Router } from 'express';
+import { RequestHandler, Router }                      from 'express';
 
 export class OpenaiRouter extends RouterBroker {
   constructor(...guards: RequestHandler[]) {
@@ -153,7 +153,7 @@ export class OpenaiRouter extends RouterBroker {
           request: req,
           schema: instanceSchema,
           ClassRef: InstanceDto,
-          execute: (instance) => openaiController.getModels(instance),
+          execute: (instance) => openaiController.getModels(instance, req.query.openaiCredsId as string),
         });
 
         res.status(HttpStatus.OK).json(response);

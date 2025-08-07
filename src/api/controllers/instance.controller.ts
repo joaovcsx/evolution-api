@@ -1,21 +1,21 @@
-import { InstanceDto, SetPresenceDto } from '@api/dto/instance.dto';
-import { ChatwootService } from '@api/integrations/chatbot/chatwoot/services/chatwoot.service';
-import { ProviderFiles } from '@api/provider/sessions';
-import { PrismaRepository } from '@api/repository/repository.service';
-import { channelController, eventManager } from '@api/server.module';
-import { CacheService } from '@api/services/cache.service';
-import { WAMonitoringService } from '@api/services/monitor.service';
-import { SettingsService } from '@api/services/settings.service';
-import { Events, Integration, wa } from '@api/types/wa.types';
-import { Auth, Chatwoot, ConfigService, HttpServer, WaBusiness } from '@config/env.config';
-import { Logger } from '@config/logger.config';
+import { InstanceDto, SetPresenceDto }                                              from '@api/dto/instance.dto';
+import { ChatwootService }                                                          from '@api/integrations/chatbot/chatwoot/services/chatwoot.service';
+import { ProviderFiles }                                                            from '@api/provider/sessions';
+import { PrismaRepository }                                                         from '@api/repository/repository.service';
+import { channelController, eventManager }                                          from '@api/server.module';
+import { CacheService }                                                             from '@api/services/cache.service';
+import { WAMonitoringService }                                                      from '@api/services/monitor.service';
+import { SettingsService }                                                          from '@api/services/settings.service';
+import { Events, Integration, wa }                                                  from '@api/types/wa.types';
+import { Auth, Chatwoot, ConfigService, HttpServer, WaBusiness }                    from '@config/env.config';
+import { Logger }                                                                   from '@config/logger.config';
 import { BadRequestException, InternalServerErrorException, UnauthorizedException } from '@exceptions';
-import { delay } from 'baileys';
-import { isArray, isURL } from 'class-validator';
-import EventEmitter2 from 'eventemitter2';
-import { v4 } from 'uuid';
+import { delay }                                                                    from 'baileys';
+import { isArray, isURL }                                                           from 'class-validator';
+import EventEmitter2                                                                from 'eventemitter2';
+import { v4 }                                                                       from 'uuid';
 
-import { ProxyController } from './proxy.controller';
+import { ProxyController }                                                          from './proxy.controller';
 
 export class InstanceController {
   constructor(
@@ -170,6 +170,9 @@ export class InstanceController {
           rabbitmq: {
             enabled: instanceData?.rabbitmq?.enabled,
           },
+          nats: {
+            enabled: instanceData?.nats?.enabled,
+          },
           sqs: {
             enabled: instanceData?.sqs?.enabled,
           },
@@ -257,6 +260,9 @@ export class InstanceController {
         },
         rabbitmq: {
           enabled: instanceData?.rabbitmq?.enabled,
+        },
+        nats: {
+          enabled: instanceData?.nats?.enabled,
         },
         sqs: {
           enabled: instanceData?.sqs?.enabled,

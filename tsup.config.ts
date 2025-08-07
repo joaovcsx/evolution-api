@@ -1,4 +1,4 @@
-import { cpSync } from 'node:fs';
+import { cpSync }       from 'node:fs';
 
 import { defineConfig } from 'tsup';
 
@@ -15,5 +15,6 @@ export default defineConfig({
   },
   loader: {
     '.json': 'file',
+    '.yml': 'file',
   },
 });

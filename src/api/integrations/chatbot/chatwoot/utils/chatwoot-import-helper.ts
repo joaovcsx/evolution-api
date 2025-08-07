@@ -1,12 +1,12 @@
-import { InstanceDto } from '@api/dto/instance.dto';
-import { ChatwootDto } from '@api/integrations/chatbot/chatwoot/dto/chatwoot.dto';
-import { postgresClient } from '@api/integrations/chatbot/chatwoot/libs/postgres.client';
-import { ChatwootService } from '@api/integrations/chatbot/chatwoot/services/chatwoot.service';
-import { Chatwoot, configService } from '@config/env.config';
-import { Logger } from '@config/logger.config';
-import { inbox } from '@figuro/chatwoot-sdk';
+import { InstanceDto }                                 from '@api/dto/instance.dto';
+import { ChatwootDto }                                 from '@api/integrations/chatbot/chatwoot/dto/chatwoot.dto';
+import { postgresClient }                              from '@api/integrations/chatbot/chatwoot/libs/postgres.client';
+import { ChatwootService }                             from '@api/integrations/chatbot/chatwoot/services/chatwoot.service';
+import { Chatwoot, configService }                     from '@config/env.config';
+import { Logger }                                      from '@config/logger.config';
+import { inbox }                                       from '@figuro/chatwoot-sdk';
 import { Chatwoot as ChatwootModel, Contact, Message } from '@prisma/client';
-import { proto } from 'baileys';
+import { proto }                                       from 'baileys';
 
 type ChatwootUser = {
   user_type: string;
@@ -169,7 +169,7 @@ class ChatwootImport {
     }
   }
 
-  public async getExistingSourceIds(sourceIds: string[]): Promise<Set<string>> {
+  public async getExistingSourceIds(sourceIds: string[], conversationId?: number): Promise<Set<string>> {
     try {
       const existingSourceIdsSet = new Set<string>();
 
@@ -177,18 +177,25 @@ class ChatwootImport {
         return existingSourceIdsSet;
       }
 
-      const formattedSourceIds = sourceIds.map((sourceId) => `WAID:${sourceId.replace('WAID:', '')}`); // Make sure the sourceId is always formatted as WAID:1234567890
-      const query = 'SELECT source_id FROM messages WHERE source_id = ANY($1)';
+      // Ensure all sourceIds are consistently prefixed with 'WAID:' as required by downstream systems and database queries.
+      const formattedSourceIds = sourceIds.map((sourceId) => `WAID:${sourceId.replace('WAID:', '')}`);
       const pgClient = postgresClient.getChatwootConnection();
-      const result = await pgClient.query(query, [formattedSourceIds]);
 
+      const params = conversationId ? [formattedSourceIds, conversationId] : [formattedSourceIds];
+
+      const query = conversationId
+        ? 'SELECT source_id FROM messages WHERE source_id = ANY($1) AND conversation_id = $2'
+        : 'SELECT source_id FROM messages WHERE source_id = ANY($1)';
+
+      const result = await pgClient.query(query, params);
       for (const row of result.rows) {
         existingSourceIdsSet.add(row.source_id);
       }
 
       return existingSourceIdsSet;
     } catch (error) {
-      return null;
+      this.logger.error(`Error on getExistingSourceIds: ${error.toString()}`);
+      return new Set<string>();
     }
   }
 
@@ -363,7 +370,7 @@ class ChatwootImport {
     const sqlFromChatwoot = `WITH
               phone_number AS (
                 SELECT phone_number, created_at::INTEGER, last_activity_at::INTEGER FROM (
-                  VALUES 
+                  VALUES
                    ${phoneNumberBind}
                  ) as t (phone_number, created_at, last_activity_at)
               ),
@@ -374,7 +381,7 @@ class ChatwootImport {
                   SELECT phone_number
                   FROM contacts
                     JOIN contact_inboxes ci ON ci.contact_id = contacts.id AND ci.inbox_id = $2
-                    JOIN conversations con ON con.contact_inbox_id = ci.id 
+                    JOIN conversations con ON con.contact_inbox_id = ci.id
                       AND con.account_id = $1
                       AND con.inbox_id = $2
                       AND con.contact_id = contacts.id
@@ -394,7 +401,7 @@ class ChatwootImport {
               new_contact_inbox AS (
                 INSERT INTO contact_inboxes (contact_id, inbox_id, source_id, created_at, updated_at)
                 SELECT new_contact.id, $2, gen_random_uuid(), new_contact.created_at, new_contact.updated_at
-                FROM new_contact 
+                FROM new_contact
                 RETURNING id, contact_id, created_at, updated_at
               ),
 
@@ -408,7 +415,7 @@ class ChatwootImport {
               )
 
               SELECT new_contact.phone_number, new_conversation.contact_id, new_conversation.id AS conversation_id
-              FROM new_conversation 
+              FROM new_conversation
               JOIN new_contact ON new_conversation.contact_id = new_contact.id
 
               UNION
@@ -499,25 +506,30 @@ class ChatwootImport {
       stickerMessage: msg.message.stickerMessage,
       templateMessage: msg.message.templateMessage?.hydratedTemplate?.hydratedContentText,
     };
-    const typeKey = Object.keys(types).find((key) => types[key] !== undefined);
 
+    const typeKey = Object.keys(types).find((key) => types[key] !== undefined && types[key] !== null);
     switch (typeKey) {
-      case 'documentMessage':
-        return `_<File: ${msg.message.documentMessage.fileName}${
-          msg.message.documentMessage.caption ? ` ${msg.message.documentMessage.caption}` : ''
-        }>_`;
+      case 'documentMessage': {
+        const doc = msg.message.documentMessage;
+        const fileName = doc?.fileName || 'document';
+        const caption = doc?.caption ? ` ${doc.caption}` : '';
+        return `_<File: ${fileName}${caption}>_`;
+      }
 
-      case 'documentWithCaptionMessage':
-        return `_<File: ${msg.message.documentWithCaptionMessage.message.documentMessage.fileName}${
-          msg.message.documentWithCaptionMessage.message.documentMessage.caption
-            ? ` ${msg.message.documentWithCaptionMessage.message.documentMessage.caption}`
-            : ''
-        }>_`;
+      case 'documentWithCaptionMessage': {
+        const doc = msg.message.documentWithCaptionMessage?.message?.documentMessage;
+        const fileName = doc?.fileName || 'document';
+        const caption = doc?.caption ? ` ${doc.caption}` : '';
+        return `_<File: ${fileName}${caption}>_`;
+      }
 
-      case 'templateMessage':
-        return msg.message.templateMessage.hydratedTemplate.hydratedTitleText
-          ? `*${msg.message.templateMessage.hydratedTemplate.hydratedTitleText}*\\n`
-          : '' + msg.message.templateMessage.hydratedTemplate.hydratedContentText;
+      case 'templateMessage': {
+        const template = msg.message.templateMessage?.hydratedTemplate;
+        return (
+          (template?.hydratedTitleText ? `*${template.hydratedTitleText}*\n` : '') +
+          (template?.hydratedContentText || '')
+        );
+      }
 
       case 'imageMessage':
         return '_<Image Message>_';

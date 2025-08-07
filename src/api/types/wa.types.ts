@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-namespace */
-import { JsonValue } from '@prisma/client/runtime/library';
+import { JsonValue }                              from '@prisma/client/runtime/library';
 import { AuthenticationState, WAConnectionState } from 'baileys';
 
 export enum Events {
@@ -15,6 +15,7 @@ export enum Events {
   MESSAGES_UPDATE = 'messages.update',
   MESSAGES_DELETE = 'messages.delete',
   SEND_MESSAGE = 'send.message',
+  SEND_MESSAGE_UPDATE = 'send.message.update',
   CONTACTS_SET = 'contacts.set',
   CONTACTS_UPSERT = 'contacts.upsert',
   CONTACTS_UPDATE = 'contacts.update',

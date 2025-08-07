@@ -1,8 +1,8 @@
-import { ConfigService, S3 } from '@config/env.config';
-import { Logger } from '@config/logger.config';
+import { ConfigService, S3 }   from '@config/env.config';
+import { Logger }              from '@config/logger.config';
 import { BadRequestException } from '@exceptions';
-import * as MinIo from 'minio';
-import { join } from 'path';
+import * as MinIo              from 'minio';
+import { join }                from 'path';
 import { Readable, Transform } from 'stream';
 
 const logger = new Logger('S3 Service');
@@ -63,9 +63,9 @@ const createBucket = async () => {
       if (!exists) {
         await minioClient.makeBucket(bucketName);
       }
-
-      await setBucketPolicy();
-
+      if (!BUCKET.SKIP_POLICY) {
+        await setBucketPolicy();
+      }
       logger.info(`S3 Bucket ${bucketName} - ON`);
       return true;
     } catch (error) {

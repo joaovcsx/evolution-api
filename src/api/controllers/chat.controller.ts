@@ -14,9 +14,9 @@ import {
   UpdateMessageDto,
   WhatsAppNumberDto,
 } from '@api/dto/chat.dto';
-import { InstanceDto } from '@api/dto/instance.dto';
-import { Query } from '@api/repository/repository.service';
-import { WAMonitoringService } from '@api/services/monitor.service';
+import { InstanceDto }                     from '@api/dto/instance.dto';
+import { Query }                           from '@api/repository/repository.service';
+import { WAMonitoringService }             from '@api/services/monitor.service';
 import { Contact, Message, MessageUpdate } from '@prisma/client';
 
 export class ChatController {
@@ -68,6 +68,10 @@ export class ChatController {
 
   public async fetchChats({ instanceName }: InstanceDto, query: Query<Contact>) {
     return await this.waMonitor.waInstances[instanceName].fetchChats(query);
+  }
+
+  public async findChatByRemoteJid({ instanceName }: InstanceDto, remoteJid: string) {
+    return await this.waMonitor.waInstances[instanceName].findChatByRemoteJid(remoteJid);
   }
 
   public async sendPresence({ instanceName }: InstanceDto, data: SendPresenceDto) {

@@ -1,5 +1,5 @@
 import { Constructor } from '@api/integrations/integration.dto';
-import { JsonValue } from '@prisma/client/runtime/library';
+import { JsonValue }   from '@prisma/client/runtime/library';
 
 export class EventDto {
   webhook?: {
@@ -22,6 +22,11 @@ export class EventDto {
   };
 
   rabbitmq?: {
+    enabled?: boolean;
+    events?: string[];
+  };
+
+  nats?: {
     enabled?: boolean;
     events?: string[];
   };
@@ -59,6 +64,11 @@ export function EventInstanceMixin<TBase extends Constructor>(Base: TBase) {
     };
 
     rabbitmq?: {
+      enabled?: boolean;
+      events?: string[];
+    };
+
+    nats?: {
       enabled?: boolean;
       events?: string[];
     };
